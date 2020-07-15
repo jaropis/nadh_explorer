@@ -6,7 +6,18 @@ source('draw_decomp.R')
 unit <- 10^-3 # ms in this case
 delta <- 40 # this is basically the sampling period
 ui <- fluidPage(
-    
+    tags$head(HTML(
+        "<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src='https://www.googletagmanager.com/gtag/js?id=UA-21860092-5'></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-21860092-5');
+</script>
+"
+    )),
     # App title ----
     titlePanel("NADH explorer"),
     
