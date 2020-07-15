@@ -37,10 +37,11 @@ ui <- fluidPage(
         
         mainPanel(
             tags$h5("The first three figures are respectively the raw fluorescence signal, the trend remaining after attempting to identify and subtract oscillations and the oscillations themselves"),
-            tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
             tags$br(),
+            
+            tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('fourier_oscyl'),
             plotly::plotlyOutput('fourier')
         )
