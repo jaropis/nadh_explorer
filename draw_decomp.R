@@ -1,7 +1,7 @@
 get_dominant_frequency <- function(data_ts) {
   # only looking in the latter part of the line, where oscillations are pronounced
   data_length <- nrow(data_ts)
-  n_two_thirds <- round(data_length * 4 / 5)
+  n_two_thirds <- round(data_length * 8 / 9)
   findfrequency(data_ts[[2]][n_two_thirds:data_length])
 }
 decompose_ts <- function(data_ts, type = "mult") {
@@ -30,14 +30,21 @@ draw_decompositions <- function(data, type = "mult") {
     hide_legend()
 }
 
-draw_fourier <- function(data, type = "multi") {
-  decomp <- decompose_ts(data, type)
-  spect <- spectrum(decomp$oscyl - mean(decomp$oscyl))
+draw_fourier <- function(data, type = "multi", decomp = FALSE) {
+  if (decomp) {
+    decomp <- decompose_ts(data, type)
+    spect <- spectrum(decomp$oscyl - mean(decomp$oscyl))
+    main_title <- 'Fourier spectrum of the oscillatory part'
+  } else {
+    spect <- spectrum(data$fluorescence - mean(data$fluorescence))
+    main_title <- "Raw Fourier spectrum of the fluorescence signal"
+  }
+  
   freq <- seq_along(spect$freq) *  1/data$time[length(data$time)]
   spect_plot <- data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
   spect_plot %>%
     plot_ly(x = ~log(freq), y = ~spec, text = ~text, hoverinfo = "text") %>% 
     add_lines() %>% 
     hide_legend() %>% 
-    layout(title = 'Fourier spectrum of the oscillatory part', yaxis = list(title = "spectrum"))
+    layout(title = main_title, yaxis = list(title = "spectrum"))
 }

@@ -36,9 +36,12 @@ ui <- fluidPage(
         ),
         
         mainPanel(
+            tags$h5("The first three figures are respectively the raw fluorescence signal, the trend remaining after attempting to identify and subtract oscillations and the oscillations themselves"),
+            tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
             tags$br(),
+            plotly::plotlyOutput('fourier_oscyl'),
             plotly::plotlyOutput('fourier')
         )
         
@@ -50,9 +53,9 @@ server <- function(input, output) {
     # reactive conductor with data
     uploaded_data <- reactive({
         req(input$file1)
-        df <- read.csv2(input$file1$datapath,
+        df <- read.csv(input$file1$datapath,
                        header = TRUE,
-                       sep = ";")
+                       sep = " ")
         names(df) <- c("time", "fluorescence", "pressure")
         df$time <- (df$time - df$time[1]) * unit 
         df
@@ -70,6 +73,10 @@ server <- function(input, output) {
     
     output$fourier <- plotly::renderPlotly({
         draw_fourier(uploaded_data(), type = input$method)
+    })
+    
+    output$fourier_oscyl <- plotly::renderPlotly({
+        draw_fourier(uploaded_data(), type = input$method, decomp = TRUE)
     })
     
 }
