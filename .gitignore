@@ -1,0 +1,10 @@
+.Rbuildignore
+.Rhistory
+.Rproj.user
+.RData
+.rstudio/
+Deployment/
+.DS_Store
+.cache/
+.Renviron
+*~
