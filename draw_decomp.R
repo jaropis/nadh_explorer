@@ -30,18 +30,18 @@ draw_decompositions <- function(data, type = "mult") {
     hide_legend()
 }
 
-draw_fourier <- function(data, type = "multi", decomp = FALSE) {
+draw_fourier <- function(fluor_data, type = "multi", decomp = FALSE) {
   if (decomp) {
-    decomp <- decompose_ts(data, type)
+    decomp <- decompose_ts(fluor_data, type)
     spect <- spectrum(decomp$oscyl - mean(decomp$oscyl))
     main_title <- 'Fourier spectrum of the oscillatory part'
   } else {
-    spect <- spectrum(data$fluorescence - mean(data$fluorescence))
+    spect <- spectrum(fluor_data$fluorescence - mean(fluor_data$fluorescence))
     main_title <- "Raw Fourier spectrum of the fluorescence signal"
   }
   
-  freq <- seq_along(spect$freq) *  1/data$time[length(data$time)]
-  spect_plot <- data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
+  freq <- seq_along(spect$freq) *  1/fluor_data$time[length(fluor_data$time)]
+  spect_plot <- fluor_data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
   spect_plot %>%
     plot_ly(x = ~log(freq), y = ~spec, text = ~text, hoverinfo = "text") %>% 
     add_lines() %>% 
