@@ -33,10 +33,10 @@ draw_decompositions <- function(data, type = "mult") {
 draw_fourier <- function(fluor_data, type = "multi", decomp = FALSE) {
   if (decomp) {
     decomp <- decompose_ts(fluor_data, type)
-    spect <- spectrum(decomp$oscyl - mean(decomp$oscyl))
+    spect <- spectrum(decomp$oscyl - mean(decomp$oscyl), plot = FALSE)
     main_title <- 'Fourier spectrum of the oscillatory part'
   } else {
-    spect <- spectrum(fluor_data$fluorescence - mean(fluor_data$fluorescence))
+    spect <- spectrum(fluor_data$fluorescence - mean(fluor_data$fluorescence), plot = FALSE)
     main_title <- "Raw Fourier spectrum of the fluorescence signal"
   }
   
