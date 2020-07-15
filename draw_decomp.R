@@ -41,7 +41,7 @@ draw_fourier <- function(fluor_data, type = "multi", decomp = FALSE) {
   }
   
   freq <- seq_along(spect$freq) *  1/fluor_data$time[length(fluor_data$time)]
-  spect_plot <- fluor_data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
+  spect_plot <- data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
   spect_plot %>%
     plot_ly(x = ~log(freq), y = ~spec, text = ~text, hoverinfo = "text") %>% 
     add_lines() %>% 
