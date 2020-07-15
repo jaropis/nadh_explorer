@@ -8,3 +8,4 @@ Deployment/
 .cache/
 .Renviron
 *~
+tracking_script
