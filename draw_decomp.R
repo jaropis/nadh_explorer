@@ -12,18 +12,20 @@ decompose_ts <- function(data_ts, type = "mult") {
 }
 draw_decompositions <- function(data, type = "mult") {
   main <- data %>% 
-    plot_ly(x = ~time, y = ~fluorescence) %>% 
+    plot_ly(x = ~time, y = ~fluorescence, hoverinfo = "x+y") %>% 
     add_lines() %>% 
-    layout(xaxis = list(title = "time"), yaxis = list(title = "recording"))
+    layout(xaxis = list(title = "time (s)"), yaxis = list(title = "fluorescence"))
   decomp <- decompose_ts(data, type)
   trend <- data.frame(time = data[[1]], trend = decomp$trend)
   oscillations <- data.frame(time = data[[1]], oscyl = decomp$oscyl)
   trend_plot <- trend %>% 
-    plot_ly(x = ~time, y = ~trend) %>% 
-    add_lines()
+    plot_ly(x = ~time, y = ~trend, hoverinfo = "x+y") %>% 
+    add_lines() %>% 
+    layout(yaxis = list(title = "trend"))
   oscyl_plot <- oscillations %>% 
-    plot_ly(x = ~time, y = ~oscyl) %>% 
-    add_lines()
+    plot_ly(x = ~time, y = ~oscyl, hoverinfo = "x+y") %>% 
+    add_lines() %>% 
+    layout(yaxis = list(title = "oscillatory\npart"))
   subplot(main, trend_plot, oscyl_plot, nrows = 3, shareX= TRUE, titleX = TRUE, titleY = TRUE) %>% 
     hide_legend()
 }
@@ -31,9 +33,11 @@ draw_decompositions <- function(data, type = "mult") {
 draw_fourier <- function(data, type = "multi") {
   decomp <- decompose_ts(data, type)
   spect <- spectrum(decomp$oscyl - mean(decomp$oscyl))
-  spect_plot <- data.frame(freq = spect$freq, spec = spect$spec)
+  freq <- seq_along(spect$freq) *  1/data$time[length(data$time)]
+  spect_plot <- data.frame(freq = freq, spec = spect$spec, text = paste(as.character(round(freq, 3)), "Hz"))
   spect_plot %>%
-    plot_ly(x = ~log(freq), y = ~spec) %>% 
+    plot_ly(x = ~log(freq), y = ~spec, text = ~text, hoverinfo = "text") %>% 
     add_lines() %>% 
-    hide_legend()
+    hide_legend() %>% 
+    layout(title = 'Fourier spectrum of the oscillatory part', yaxis = list(title = "spectrum"))
 }

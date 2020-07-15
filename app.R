@@ -28,15 +28,17 @@ ui <- fluidPage(
             
             # Input: Select number of rows to display ----
             radioButtons("method", "Decomposition method",
-                         choices = c("multiplicative",
-                                     "additive"),
-                         selected = "multiplicative")
+                         choices = c("additive",
+                                     "multiplicative"
+                                     ),
+                         selected = "additive")
             
         ),
         
         mainPanel(
             plotly::plotlyOutput('decompositions'),
-            textOutput('description'),
+            tags$h4(textOutput('description')),
+            tags$br(),
             plotly::plotlyOutput('fourier')
         )
         
@@ -63,7 +65,7 @@ server <- function(input, output) {
     output$description <- renderText({
         sprintf("The dominant frequency in this recording is %f Hz or %f bpm", 
                 round(1 / (unit * get_dominant_frequency(uploaded_data()) * delta), 4),
-                round((unit * get_dominant_frequency(uploaded_data())) * delta, 4))
+                round((unit * get_dominant_frequency(uploaded_data())) * delta / 60, 4))
     })
     
     output$fourier <- plotly::renderPlotly({
