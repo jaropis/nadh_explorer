@@ -41,7 +41,7 @@ ui <- fluidPage(
             tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
-            verbatimTextOutput("selecting"),
+            plotly::plotlyOutput('selections'),
             tags$br(),
             plotly::plotlyOutput('fourier'),
             plotly::plotlyOutput('fourier_oscyl')
@@ -62,17 +62,16 @@ server <- function(input, output) {
         df
     })
     
-    selected_data <- reactive({})
+    # this reactive conductor will hold selections
+    selected_data <- reactive({
+        req(uploaded_data())
+        selection <- event_data("plotly_brushed", source = "decompositions")
+        uploaded_data()[uploaded_data()[[1]] >= selection$x[1] & uploaded_data()[[1]] <= selection$x[[2]], ]
+        })
     
     output$decompositions <- plotly::renderPlotly({
         req(uploaded_data())
         draw_decompositions(uploaded_data(), type = input$method, input$show_decompositions)
-    })
-    
-    observe({
-        req(uploaded_data())
-        d <- event_data("plotly_brushed", source = "decompositions")
-        if (is.null(d)) print("Brush points appear here (double-click to clear)") else print(d)
     })
     
     output$description <- renderText({
@@ -85,6 +84,10 @@ server <- function(input, output) {
         }
     })
     
+    output$selections <- plotly::renderPlotly({
+        req(nrow(selected_data()) > 1)
+        draw_selections(selected_data(), type = input$method, FALSE)
+    })
     output$fourier <- plotly::renderPlotly({
         draw_fourier(uploaded_data(), type = input$method)
     })

@@ -1,10 +1,16 @@
+#' Function to try and read the dominant frequency off of the recording
+#' @param data_ts time series
 get_dominant_frequency <- function(data_ts) {
   # only looking in the latter part of the line, where oscillations are pronounced
   data_length <- nrow(data_ts)
   n_two_thirds <- round(data_length * 8 / 9)
   findfrequency(data_ts[[2]][n_two_thirds:data_length])
 }
-decompose_ts <- function(data_ts, type = "mult") {
+
+#' Function decomposing a recording into trend and oscillatory part
+#' @param data_ts time series data
+#' @param type decomposition type (additive or multiplicative)
+decompose_ts <- function(data_ts, type = "additive") {
   freq <- get_dominant_frequency(data_ts)
   new_data_ts <- ts(data_ts[[2]], frequency = freq)
   decomposed <- decompose(new_data_ts, type = type)
@@ -41,7 +47,11 @@ draw_decompositions <- function(data, type = "mult", show_decompositions) {
   }
 }
 
-draw_fourier <- function(fluor_data, type = "multi", decomp = FALSE) {
+#' function to draw fourier spectrum
+#' @param flour_data data for fourier analysis
+#' @param type type of decomposition, if we are interested in drawing only the oscillatory part 
+#' @param decomp whether or not to use decomposition
+draw_fourier <- function(fluor_data, type = "additive", decomp = FALSE) {
   if (decomp) {
     decomp <- decompose_ts(fluor_data, type)
     spect <- spectrum(decomp$oscyl - mean(decomp$oscyl), plot = FALSE)
