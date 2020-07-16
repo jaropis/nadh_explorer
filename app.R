@@ -41,11 +41,11 @@ ui <- fluidPage(
             tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
+            verbatimTextOutput("selecting"),
             tags$br(),
             plotly::plotlyOutput('fourier'),
             plotly::plotlyOutput('fourier_oscyl')
         )
-        
     )
 )
 
@@ -62,8 +62,17 @@ server <- function(input, output) {
         df
     })
     
+    selected_data <- reactive({})
+    
     output$decompositions <- plotly::renderPlotly({
+        req(uploaded_data())
         draw_decompositions(uploaded_data(), type = input$method, input$show_decompositions)
+    })
+    
+    observe({
+        req(uploaded_data())
+        d <- event_data("plotly_brushed", source = "decompositions")
+        if (is.null(d)) print("Brush points appear here (double-click to clear)") else print(d)
     })
     
     output$description <- renderText({
@@ -87,7 +96,6 @@ server <- function(input, output) {
             NULL
         }
     })
-    
 }
 
 # Create Shiny app ----

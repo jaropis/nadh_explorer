@@ -16,9 +16,11 @@ decompose_ts <- function(data_ts, type = "mult") {
 #' @param show_decompositions - whether or not the dominant frequency decomposition should be shown
 draw_decompositions <- function(data, type = "mult", show_decompositions) {
   main <- data %>% 
-    plot_ly(x = ~time, y = ~fluorescence, hoverinfo = "x+y") %>% 
+    plot_ly(x = ~time, y = ~fluorescence, hoverinfo = "x+y", source = "decompositions") %>% 
     add_lines() %>% 
-    layout(xaxis = list(title = "time (s)"), yaxis = list(title = "fluorescence"))
+    add_markers(x = data$time[[1]], y = data$fluorescence[[1]], size = I(1), color = I("blue"), hoverinfo = 'skip') %>% # it is really strange that this is needed here ... otherwise no select button ... strange
+    layout(xaxis = list(title = "time (s)"), yaxis = list(title = "fluorescence")) %>% 
+    event_register("plotly_brushed")
   if (show_decompositions) {
     decomp <- decompose_ts(data, type)
     trend <- data.frame(time = data[[1]], trend = decomp$trend)
@@ -34,7 +36,8 @@ draw_decompositions <- function(data, type = "mult", show_decompositions) {
     subplot(main, trend_plot, oscyl_plot, nrows = 3, shareX= TRUE, titleX = TRUE, titleY = TRUE) %>% 
       hide_legend() 
   } else {
-    main
+    main %>% 
+      hide_legend()
   }
 }
 
