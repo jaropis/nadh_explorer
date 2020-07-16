@@ -6,6 +6,7 @@ source('draw_decomp.R')
 unit <- 10^-3 # ms in this case
 delta <- 40 # this is basically the sampling period
 ui <- fluidPage(
+    tags$head(HTML()), # put tracking code here
     # App title ----
     titlePanel("NADH explorer"),
     
