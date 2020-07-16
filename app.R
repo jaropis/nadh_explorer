@@ -25,7 +25,12 @@ ui <- fluidPage(
             # Horizontal line ----
             tags$hr(),
             
-            # Input: Select number of rows to display ----
+            # Selecting smoothing degree
+            sliderInput("smoothing_dgr", "Select degree of smoothing", min = 1, max = 50, value = 20),
+            
+            tags$hr(),
+            
+            # Selecting decomposition method ----
             radioButtons("method", "Decomposition method",
                          choices = c("additive",
                                      "multiplicative"
@@ -86,8 +91,9 @@ server <- function(input, output) {
     
     output$selections <- plotly::renderPlotly({
         req(nrow(selected_data()) > 1)
-        draw_selections(selected_data(), type = input$method, FALSE)
+        draw_selections(selected_data(), type = input$method, smoothing_dgr = input$smoothing_dgr)
     })
+    
     output$fourier <- plotly::renderPlotly({
         draw_fourier(uploaded_data(), type = input$method)
     })

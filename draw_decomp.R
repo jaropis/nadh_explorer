@@ -69,3 +69,28 @@ draw_fourier <- function(fluor_data, type = "additive", decomp = FALSE) {
     hide_legend() %>% 
     layout(title = main_title, yaxis = list(title = "spectrum"))
 }
+
+#' @param data data
+#' @param type type of decomposition into trend and seasonal part - multiplicative or additive
+#' @param smoothing_dgr - how much data should be smoothed by MA, from 1 to 50 (the most smoothing)
+draw_selections <- function(data, type = "mult", smoothing_dgr) {
+  main <- data %>% 
+    plot_ly(x = ~time, y = ~fluorescence, hoverinfo = "x+y", source = "decompositions") %>% 
+    add_lines() %>% 
+    add_markers(x = data$time[[1]], y = data$fluorescence[[1]], size = I(1), color = I("blue"), hoverinfo = 'skip') %>% # it is really strange that this is needed here ... otherwise no select button ... strange
+    layout(xaxis = list(title = "time (s)"), yaxis = list(title = "fluorescence"))
+  smooth <- stats::filter(data[[2]], sides=2, filter=rep(1/smoothing_dgr, smoothing_dgr))
+  trend <- data.frame(time = data[[1]], trend = smooth)
+  oscillations <- data.frame(time = data[[1]], oscyl = data[[2]] - trend[["trend"]])
+  #oscillations <- data.frame(time = data[[1]], oscyl = decomp$oscyl)
+  trend_plot <- trend %>% 
+    plot_ly(x = ~time, y = ~trend, hoverinfo = "x+y") %>% 
+    add_lines() %>% 
+    layout(yaxis = list(title = "trend"))
+  oscyl_plot <- oscillations %>% 
+    plot_ly(x = ~time, y = ~oscyl, hoverinfo = "x+y") %>% 
+    add_lines() %>% 
+    layout(yaxis = list(title = "oscillatory\npart"))
+  subplot(main, trend_plot, oscyl_plot, nrows = 1, shareY= FALSE, titleX = TRUE, titleY = TRUE) %>% 
+    hide_legend() 
+}
