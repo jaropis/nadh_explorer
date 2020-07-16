@@ -10,24 +10,32 @@ decompose_ts <- function(data_ts, type = "mult") {
   decomposed <- decompose(new_data_ts, type = type)
   data.frame(trend = decomposed$trend, oscyl = decomposed$seasonal)
 }
-draw_decompositions <- function(data, type = "mult") {
+
+#' @param data data
+#' @param type type of decomposition into trend and seasonal part - multiplicative or additive
+#' @param show_decompositions - whether or not the dominant frequency decomposition should be shown
+draw_decompositions <- function(data, type = "mult", show_decompositions) {
   main <- data %>% 
     plot_ly(x = ~time, y = ~fluorescence, hoverinfo = "x+y") %>% 
     add_lines() %>% 
     layout(xaxis = list(title = "time (s)"), yaxis = list(title = "fluorescence"))
-  decomp <- decompose_ts(data, type)
-  trend <- data.frame(time = data[[1]], trend = decomp$trend)
-  oscillations <- data.frame(time = data[[1]], oscyl = decomp$oscyl)
-  trend_plot <- trend %>% 
-    plot_ly(x = ~time, y = ~trend, hoverinfo = "x+y") %>% 
-    add_lines() %>% 
-    layout(yaxis = list(title = "trend"))
-  oscyl_plot <- oscillations %>% 
-    plot_ly(x = ~time, y = ~oscyl, hoverinfo = "x+y") %>% 
-    add_lines() %>% 
-    layout(yaxis = list(title = "oscillatory\npart"))
-  subplot(main, trend_plot, oscyl_plot, nrows = 3, shareX= TRUE, titleX = TRUE, titleY = TRUE) %>% 
-    hide_legend()
+  if (show_decompositions) {
+    decomp <- decompose_ts(data, type)
+    trend <- data.frame(time = data[[1]], trend = decomp$trend)
+    oscillations <- data.frame(time = data[[1]], oscyl = decomp$oscyl)
+    trend_plot <- trend %>% 
+      plot_ly(x = ~time, y = ~trend, hoverinfo = "x+y") %>% 
+      add_lines() %>% 
+      layout(yaxis = list(title = "trend"))
+    oscyl_plot <- oscillations %>% 
+      plot_ly(x = ~time, y = ~oscyl, hoverinfo = "x+y") %>% 
+      add_lines() %>% 
+      layout(yaxis = list(title = "oscillatory\npart"))
+    subplot(main, trend_plot, oscyl_plot, nrows = 3, shareX= TRUE, titleX = TRUE, titleY = TRUE) %>% 
+      hide_legend() 
+  } else {
+    main
+  }
 }
 
 draw_fourier <- function(fluor_data, type = "multi", decomp = FALSE) {

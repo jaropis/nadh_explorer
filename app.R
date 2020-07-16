@@ -30,7 +30,9 @@ ui <- fluidPage(
                          choices = c("additive",
                                      "multiplicative"
                                      ),
-                         selected = "additive")
+                         selected = "additive"),
+            
+            shiny::checkboxInput("show_decompositions", "Show main decomposition", value = FALSE)
             
         ),
         
@@ -40,8 +42,8 @@ ui <- fluidPage(
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
             tags$br(),
-            plotly::plotlyOutput('fourier_oscyl'),
-            plotly::plotlyOutput('fourier')
+            plotly::plotlyOutput('fourier'),
+            plotly::plotlyOutput('fourier_oscyl')
         )
         
     )
@@ -61,13 +63,17 @@ server <- function(input, output) {
     })
     
     output$decompositions <- plotly::renderPlotly({
-        draw_decompositions(uploaded_data(), type = input$method)
+        draw_decompositions(uploaded_data(), type = input$method, input$show_decompositions)
     })
     
     output$description <- renderText({
-        sprintf("The dominant frequency in this recording is %f Hz or %f bpm", 
-                round(1 / (unit * get_dominant_frequency(uploaded_data()) * delta), 4),
-                round((unit * get_dominant_frequency(uploaded_data())) * delta / 60, 4))
+        if (input$show_decompositions) {
+            sprintf("The dominant frequency in this recording is %f Hz or %f bpm", 
+                    round(1 / (unit * get_dominant_frequency(uploaded_data()) * delta), 4),
+                    round((unit * get_dominant_frequency(uploaded_data())) * delta / 60, 4))
+        } else {
+            NULL
+        }
     })
     
     output$fourier <- plotly::renderPlotly({
@@ -75,7 +81,11 @@ server <- function(input, output) {
     })
     
     output$fourier_oscyl <- plotly::renderPlotly({
-        draw_fourier(uploaded_data(), type = input$method, decomp = TRUE)
+        if (input$show_decompositions) {
+            draw_fourier(uploaded_data(), type = input$method, decomp = TRUE)
+        } else {
+            NULL
+        }
     })
     
 }
