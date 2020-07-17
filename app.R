@@ -6,7 +6,7 @@ source('draw_decomp.R')
 unit <- 10^-3 # ms in this case
 delta <- 40 # this is basically the sampling period
 ui <- fluidPage(
-    tags$head(HTML()), # put tracking code here
+    #tags$head(HTML()), # put tracking code here
     # App title ----
     titlePanel("NADH explorer"),
     
@@ -43,11 +43,19 @@ ui <- fluidPage(
         ),
         
         mainPanel(
-            tags$h5("The first three figures are respectively the raw fluorescence signal, the trend remaining after attempting to identify and subtract oscillations and the oscillations themselves"),
-            tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
+            #tags$h5("The first three figures are respectively the raw fluorescence signal, the trend remaining after attempting to identify and subtract oscillations and the oscillations themselves"),
+            #tags$h5("The remaining two figures are the Fourier transform of the above oscillatory part and the Fourier transform of the fluorescence signal"),
             plotly::plotlyOutput('decompositions'),
             tags$h4(textOutput('description')),
             plotly::plotlyOutput('selections'),
+            fluidRow(
+                column(6, {
+                    plotly::plotlyOutput('fourier_selection_raw')
+                }),
+                column(6, {
+                    plotly::plotlyOutput('fourier_selection_oscyl')
+                })
+            ),
             tags$br(),
             plotly::plotlyOutput('fourier'),
             plotly::plotlyOutput('fourier_oscyl')
@@ -75,6 +83,12 @@ server <- function(input, output) {
         uploaded_data()[uploaded_data()[[1]] >= selection$x[1] & uploaded_data()[[1]] <= selection$x[[2]], ]
         })
     
+    # this reactive conductor will hold trend and oscyllations
+    trend_oscyl <- reactive({
+        req(nrow(selected_data()) > 1)
+        calc_trend_and_oscyl(selected_data(), input$smoothing_dgr)
+    })
+    
     output$decompositions <- plotly::renderPlotly({
         req(uploaded_data())
         draw_decompositions(uploaded_data(), type = input$method, input$show_decompositions)
@@ -92,7 +106,21 @@ server <- function(input, output) {
     
     output$selections <- plotly::renderPlotly({
         req(nrow(selected_data()) > 1)
-        draw_selections(selected_data(), type = input$method, smoothing_dgr = input$smoothing_dgr)
+        draw_selections(selected_data(), trend_oscyl()[["trend"]], trend_oscyl()[["oscillations"]])
+    })
+    
+    output$fourier_selection_raw <- plotly::renderPlotly({
+        req(nrow(selected_data()) > 1)
+        selected_data() %>% 
+            get_fourier() %>% 
+            draw_spect_plot(main_title = "Raw", line_color = "blue")
+    })
+    
+    output$fourier_selection_oscyl <- plotly::renderPlotly({
+        req(trend_oscyl)
+        trend_oscyl()[["oscillations"]] %>% 
+            get_fourier() %>% 
+            draw_spect_plot(main_title = "Oscill", line_color = "red")
     })
     
     output$fourier <- plotly::renderPlotly({
